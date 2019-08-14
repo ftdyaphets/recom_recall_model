@@ -30,22 +30,30 @@ object CalcUserSim {
     val data_rating = get_data_rating(sc, params.data_rating_input_path)
     BaseUtils.print_rdd(data_rating.map(_.toString()), "data_rating")
 
-    println("calc u_sim by jaccard distance with minHashLsh ...")
+    logger.info("calc u_sim by jaccard distance with minHashLsh ...")
     val rating_sim = get_dataRating_minHashLsh(spark, data_rating, 100, 10)
     BaseUtils.print_rdd(rating_sim.map(_.toString()), "rating_sim")
 
-    println("calc u_sim by euclidean distance with bucketedRandom Lsh ...")
+    logger.info("calc u_sim by euclidean distance with bucketedRandom Lsh ...")
     val user_features = get_user_feature(sc, params)
     BaseUtils.print_rdd(user_features.sortBy(_._1).map(_.toString), "user_features")
     val fea_sim = get_feature_minHashLsh(spark, user_features)
     BaseUtils.print_rdd(fea_sim.map(_.toString()), "fea_sim")
 
-    val sim_results = fea_sim.union(rating_sim).map(x => ((x._1, x._2), x._3))
+    logger.info("merge sim results ...")
+    val sim_results = normalize_rating(fea_sim, 3, 5)
+      .union(normalize_rating(rating_sim, 3, 5)).map(x => ((x._1, x._2), x._3))
       .groupByKey().mapValues {
       x =>
         val size = x.size
-
-    }
+		val ratings = x.toList
+        if (size == 2) {
+          ratings(0) * 0.5 + ratings(1) * 0.5
+        } else {
+          ratings(0)
+        }
+    }.map(x => (x._1._1, x._1._2, x._2))
+    BaseUtils.print_rdd(sim_results.map(_.toString()), "sim_results")
 
 
   }
