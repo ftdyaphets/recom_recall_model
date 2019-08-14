@@ -8,7 +8,7 @@ spark运行模式：local[6]<br>
 
 用户相似度尝试过用物品倒排计算两两相似、spark分布式矩阵rowMatrix，但优化效果都不好，依然无法运行出结果，
 最后使用spark的minhash、随机分桶加lsh实现，在单机上跑出结果。<br>
-slopeone尝试过python surprise库实现，但内存直接溢出，spark没有官方slopeone实现，子集用scala、saprk实现的slopeone也没能运行出结果,
+slopeone尝试过python surprise库实现，但内存直接溢出，spark没有官方slopeone实现，自己用scala、saprk实现的slopeone也没能运行出结果,
 最后使用python实现slopeone算法，运行出结果，但所用时间较长，总共花费60个小时。期间尝试过cython、numpy优化，但效果都不够。
 cython数据结构在时间上并不比python字典快多少，且还需要额外的环境配置，numpy矩阵乘法效率高，但在构建矩阵的过程开销较大，甚至远远超过计算时间。<br>
 记录一下整理优化结果，期待后续的更好优化方式。
